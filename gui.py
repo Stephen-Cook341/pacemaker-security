@@ -1,8 +1,13 @@
 from asyncio import FastChildWatcher
 from socket import create_server
+from statistics import mode
 import  threading
 from tkinter import Tk as tk
 from tkinter import *
+from tkinter import ttk
+import tkinter.font as tkFont
+
+from matplotlib.pyplot import title
 from cardio_server import Cardio_server
 from tools import whitelist_input,load_user
 from cryptography_tools import *
@@ -16,6 +21,9 @@ class Gui():
     def __init__(self,main_window):
           
         #load settings hear 
+        
+        def_font = tkFont.nametofont("TkDefaultFont")
+        def_font.config(size=16)
         server_thread = threading.Thread(target=self.server_wrapper)
         server_thread.daemon = True
         server_thread.start()
@@ -46,14 +54,40 @@ class Gui():
         self._password_textfield = Entry(self.frame,show='*',width=40,border=5)
         self._password_textfield.pack()
         
-        login_btn = Button(text="login",width=38 ,command = self.verify_credentials)
+        login_btn = Button(self.main_frame,text="login",width=38 ,command = self.verify_credentials)
         login_btn.pack()
         
    
-        
+    #settings menu 
+    #TODO add status options
+    #TODO add lower and upperthreshold selection
+    #TODO add save telemetry to file option
     def menu(self):
         
-        self.frame.children.clear()
+        self.clear_frame()
+        
+        mode_label = Label(text="Pacemaker mode selection")
+        mode_label.pack()
+        current_val = StringVar()
+
+        mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val)
+        mode_combo['values'] = ('mode1','mode2','mode3')
+        current_val = 'mode1' 
+
+        mode_combo['state'] = 'readonly'
+        mode_combo.set('mode1')
+        mode_combo.pack()
+        
+        
+        
+    #clears the primary frame    
+    def clear_frame(self):
+        
+        
+        frame_info = self.main_frame.winfo_children()
+        for widget in frame_info:
+            widget.destroy()
+        
         
     def verify_credentials(self):
             
@@ -64,21 +98,21 @@ class Gui():
             server_thread1 = threading.Thread(target=self.c_server.create_server())
             server_thread1.daemon = True
             server_thread1.start()
+            self.menu()
                 
         else:
             print("Incorrect credentials")
-                    
-        
-        
-    
-        
+                        
         
        
         
     def create_main_frame(self):
         self.main_frame = Frame(self.main_window)
-        self.main_frame.pack()
+        self.main_frame.pack(pady=50)
         self.login_menu()
+
+
+
 
 main_window = tk() 
 main_window.title("Cardio Client")

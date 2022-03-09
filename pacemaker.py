@@ -25,11 +25,25 @@ class Pacemaker_model():
          pass
      
     def client_net_code(self):
-        self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
         
+        self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
         self.ip = '127.0.0.1'
+        port_list = (8080,10000,7777)
+
         self.port = 8080
-        self.sock.connect((self.ip,self.port))
+        
+        try:
+            self.sock.connect((self.ip,self.port))
+        
+        except socket.gaierror:
+            
+            for i in len(port_list):
+                self._port = port_list[i]
+                self.sock.connect((self.ip,self.port))
+
+        
+        
+        
         data = bytes("sent data", "utf-8")
 
         self.send_msg(data)

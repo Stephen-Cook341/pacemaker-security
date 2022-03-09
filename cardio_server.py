@@ -1,8 +1,10 @@
+from email import header
 import sys
 import cryptography_tools
 from tools import whitelist_input,load_user
 import socket
 import threading
+import json as js
 #Shared key encryption scheme and Diffiehelman
 
 #TODO Stretch Goal: Store user credentials and pacemaker history
@@ -47,16 +49,25 @@ class Cardio_server():
         
     def create_server(self):
         
-        
+        port_list = (8080,10000,7777)
         print("Server running")
         self.server_running = True
         #tcp socket
         self._ip = '127.0.0.1'
-        self._port = 8080
+        self._port = port_list[0]
         self._buff_size = 2048
-        
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.sock.bind((self._ip,self._port))
+        #if port in use, try other ports 
+        try:
+            self.sock.bind((self._ip,self._port))
+        
+        except socket.gaierror:
+            
+            for i in len(port_list):
+                self._port = port_list[i]
+
+            self.sock.bind((self._ip,self._port))
+
         self.sock.listen(1)
         #self.connections =[]
        
@@ -77,7 +88,15 @@ class Cardio_server():
             if not data:
                 print('Pacemaker: ',c," is disconnected")
                 break
-            print(str(data,"utf-8"))
+            #converts from bytes back to json
+            data = js.loads(str(data,"utf-8"))
+            data = data['data']
+            for x in data:
+            #if header is id print id
+                if str(x['header']) == 'pacemaker_identity':
+                    print(x['pacemaker_id'])
+                
+            print(data)
 
             
     def decode_message(self,data):
