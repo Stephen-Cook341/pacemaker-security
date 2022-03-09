@@ -31,10 +31,21 @@ class Pacemaker_model():
         self.ip = '127.0.0.1'
         self.port = 8080
         self.sock.connect((self.ip,self.port))
-        self.send_connect_msg()
+        data = bytes("sent data", "utf-8")
+
+        self.send_msg(data)
+        self.client_listener()
         
+    def client_listener(self):
+        
+        while True: 
+            data = self.sock.recv(2048)
+            if not data:
+                break
+            
+            
      
-    def send_connect_msg(self):
+    def send_msg(self,data):
         pacemaker_id = 5
         
         msg = {"data":[
@@ -42,8 +53,7 @@ class Pacemaker_model():
                         "pacemaker_id":pacemaker_id}
                 ]
             }
-        data = "sent data"
-        
-        self.sock.send(data.encode())
+        msg = js.dumps(msg)
+        self.sock.send(bytes(msg,'utf-8'))
    
 dummy_pacemaker = Pacemaker_model()

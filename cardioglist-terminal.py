@@ -1,3 +1,5 @@
+from genericpath import exists
+from http import client
 import sys
 from tools import whitelist_input,check_user
 import socket
@@ -17,17 +19,42 @@ class Cardio_client():
     def __init__(self):
         
         #ToDO whitelist the inputs
-        self.attempts = 3
-        while self.attempts > 0:
+        #self.attempts = 3
+        #while self.attempts > 0:
     
-            username = whitelist_input(input("Enter Username: ")) 
-            password = whitelist_input(getpass(prompt= 'Enter Password: ', mask='*')) 
+            #username = whitelist_input(input("Enter Username: ")) 
+           # password = whitelist_input(input('Enter Password: ')) 
         
-        print(username," ", password)
+        #print(username," ", password)
+        self.server_running = False
+        menu_thread = threading.Thread(target=self.menu)
+        menu_thread.daemon = True
+        menu_thread.start()
+        menu_thread.join()
             #self.verify_credentials(username,password)
-        self.create_server()
+        #self.create_server()
+        
+        
+    def menu(self):
+        print("Command List \n 1: exit\n 2: run server")
+        while True:
+            command = input("enter command:  ")
+            if command == '1':
+                if self.server_running is False:
+                #self.sock.shutdown()
+                    print("run server must be ran befoe shutting down ")
+
+                else:
+                    self.sock.close()
+                    sys.exit(0)
+            if command == '2':
+                self.create_server()
+                
+        
         
     def create_server(self):
+        
+        self.server_running = True
         #tcp socket
         self._ip = '127.0.0.1'
         self._port = 8080
@@ -36,20 +63,24 @@ class Cardio_client():
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.sock.bind((self._ip,self._port))
         self.sock.listen(1)
-        self.connections =[]
-        
-        self.client_listener()
+        #self.connections =[]
+       
+        listener_thread = threading.Thread(target=self.client_listener)
+        listener_thread.daemon = True
+        listener_thread.start()
+        listener_thread.join()
         
         
     #handles client connections
     def client_handler(self,c,a):
         while True:
             data = c.recv(self._buff_size)
-            print(data)
             #for connection in self.connections:
                 #connection.send(data)
             if not data:
                 break
+            print(str(data,"utf-8"))
+
             
     def decode_message(self):
         pass
@@ -64,8 +95,9 @@ class Cardio_client():
             client_thread = threading.Thread(target=self.client_handler,args=(c,a))
             client_thread.daemon = True
             client_thread.start()
-            self.connections.append(c)
-            print(self.connections)
+            client_thread.join()
+            #self.connections.append(c)
+            #print(self.connections)
             
      
             
