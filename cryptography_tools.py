@@ -96,9 +96,9 @@ class Cryptography_tools:
         
       
         
-key = Cryptography_tools()  
+#key = Cryptography_tools()  
 
 #key.create_key()
-key.encrypt()
+#key.encrypt()
  
     

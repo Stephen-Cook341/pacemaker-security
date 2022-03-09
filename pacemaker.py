@@ -11,7 +11,6 @@ class Pacemaker_model():
         self.battery_capacity = 3500
         #self.battery_current_charge 
         self.decrypt = True
-        
         self.client_net_code()
         
         if self.decrypt == True:

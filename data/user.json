@@ -1,8 +1,9 @@
-{"user":[{
-    "username": "admin",
-    "salt": "b'$2b$14$afmOG98aNo7qV9xtZ/M8Lu'",
-    "password": "b'$2b$14$afmOG98aNo7qV9xtZ/M8LuQGpcFzIGNRDvmqgYDmTHVBiEt/nIhAi'"
-    }]
+{
+    "user": [
+        {
+            "username": "admin",
+            "salt": "$2b$14$vSU9axrJ8PBv.hRJcHWqve",
+            "password": "$2b$14$vSU9axrJ8PBv.hRJcHWqveM8QvFesZz5fa99DR1iOz.x0HepTtY6q"
+        }
+    ]
 }
-
-
