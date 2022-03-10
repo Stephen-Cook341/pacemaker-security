@@ -33,21 +33,22 @@ class Cryptography_tools:
         
     #TODO each pacemaker has a unique ID and shared key, 
     #TODO if no paceaker is stored. create  key 
-    def encrypt(self):
+    
+    
+    def encrypt(self,data):
         
-        #TODO pass and return data for encrypt
-        data = "test"
+        data = str(data)
         data_to_encrypt = data.encode()
         self._fernet = Fernet(self._key)
         self._encrypted_data = self._fernet.encrypt(bytes(data_to_encrypt,"utf-8"))
         print ("encryoted data:",self._encrypted_data)
-        self.decrypt()
+        
+        return self._encrypted_data
     
-    #TODO pass and return data for decrypt
-    def decrypt(self):
+    def decrypt(self,data):
         data = self._fernet.decrypt(bytes(self._encrypted_data,'utf-8'))
         print("decrypted data: ",data)
-        self.load_save_key()
+        return data
         
         
     #TODO fix bug with saving keys

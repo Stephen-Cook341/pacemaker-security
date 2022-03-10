@@ -1,7 +1,6 @@
-from email import header
 import sys
 import cryptography_tools
-from tools import whitelist_input,load_user
+from pacemaker import Pacemaker
 import socket
 import threading
 import json as js
@@ -63,13 +62,13 @@ class Cardio_server():
         
         except socket.gaierror:
             
-            for i in len(port_list):
+            for i in port_list:
                 self._port = port_list[i]
 
             self.sock.bind((self._ip,self._port))
 
         self.sock.listen(1)
-        #self.connections =[]
+        self.connections =[]
        
         listener_thread = threading.Thread(target=self.client_listener)
         listener_thread.daemon = True
@@ -92,10 +91,13 @@ class Cardio_server():
             data = js.loads(str(data,"utf-8"))
             data = data['data']
             for x in data:
-            #if header is id print id
+                
+            #if header is id print id and save to list 
                 if str(x['header']) == 'pacemaker_identity':
                     print(x['pacemaker_id'])
-                
+                    pacemaker = Pacemaker(x['pacemaker_id'],c)
+                    self.connections.append(pacemaker)
+                    print(str(self.connections[0]))
             print(data)
 
             

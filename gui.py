@@ -1,18 +1,20 @@
-from asyncio import FastChildWatcher
-from socket import create_server
-from statistics import mode
 import  threading
+import tkinter.font as tkFont
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
+from PIL import Image, ImageTk
 from tkinter import Tk as tk
 from tkinter import *
 from tkinter import ttk
-import tkinter.font as tkFont
-
-from matplotlib.pyplot import title
 from cardio_server import Cardio_server
 from tools import whitelist_input,load_user
 from cryptography_tools import *
+matplotlib.use('TkAgg')
 #TODO add encrypt, datagrams, history, fix password login
 #TODO put server in its own thread
+#TODO  add cnavas fro graph and then add plot to fig
 
 
 class Gui():
@@ -21,6 +23,8 @@ class Gui():
     def __init__(self,main_window):
           
         #load settings hear 
+        #encryption is off by default 
+        self.encryption_on = False
         
         def_font = tkFont.nametofont("TkDefaultFont")
         def_font.config(size=16)
@@ -65,7 +69,29 @@ class Gui():
     def menu(self):
         
         self.clear_frame()
+        #creates canvas for cardio plot 
+        canvas = Canvas(self.main_frame,width=300,height=200,bg='white')
+        canvas.pack()
+        fig = Figure(figsize = (5, 5), dpi = 100)
+        y = [i**2 for i in range(101)]
+        # adding the subplot 
+        plot1 = fig.add_subplot(111) 
+
+        # plotting the graph 
+        plot1.plot(y) 
+
+        # creating the Tkinter canvas 
+        # containing the Matplotlib figure 
+        output = FigureCanvasTkAgg(fig, master = canvas)
+        output.draw()
+
+        # placing the canvas on the Tkinter window 
+        output.get_tk_widget().pack() 
+
+       
         
+        
+        #Combo drop down menu to select pacemaker mode
         mode_label = Label(text="Pacemaker mode selection")
         mode_label.pack()
         current_val = StringVar()
@@ -79,6 +105,23 @@ class Gui():
         mode_combo.pack()
         
         
+        self.encryption_button = Button(self.main_frame,text="Turn encryption ON",command=self.encrypt_button_switch)
+        self.encryption_button.pack()     
+
+        
+    #encyrpt toggle btn function     
+    def encrypt_button_switch(self):
+    
+        if(self.encryption_on == False):
+            self.encryption_on = True
+            self.encryption_button.config(text="Turn encryption OFF")
+            print("encrypt is",self.encryption_on)
+            
+        else:
+            self.encryption_on = False
+            self.encryption_button.config(text="Turn encryption ON")
+            print("encrypt is",self.encryption_on)
+
         
     #clears the primary frame    
     def clear_frame(self):
@@ -93,6 +136,7 @@ class Gui():
             
         
         if load_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
+            
             print("terminal check")
             #self.menu()
             server_thread1 = threading.Thread(target=self.c_server.create_server())
@@ -107,6 +151,7 @@ class Gui():
        
         
     def create_main_frame(self):
+        
         self.main_frame = Frame(self.main_window)
         self.main_frame.pack(pady=50)
         self.login_menu()
