@@ -1,5 +1,4 @@
 import  threading
-import tkinter.font as tkFont
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -9,7 +8,7 @@ from tkinter import Tk as tk
 from tkinter import *
 from tkinter import ttk
 from cardio_server import Cardio_server
-from tools import whitelist_input,load_user
+from tools import whitelist_input,check_user
 from cryptography_tools import *
 matplotlib.use('TkAgg')
 #TODO add encrypt, datagrams, history, fix password login
@@ -23,11 +22,9 @@ class Gui():
     def __init__(self,main_window):
           
         #load settings hear 
-        #encryption is off by default 
-        self.encryption_on = False
+        #encryption is on by default 
+        self.encryption_on = True
         
-        def_font = tkFont.nametofont("TkDefaultFont")
-        def_font.config(size=16)
         server_thread = threading.Thread(target=self.server_wrapper)
         server_thread.daemon = True
         server_thread.start()
@@ -45,21 +42,21 @@ class Gui():
 
         
         self.frame = Frame(self.main_frame,width=40,border=5)
-        self.frame.pack(pady=50)
+        self.frame.grid(row=0,column=0)
         
         uname_label = Label(self.frame,text="enter username",)
-        uname_label.pack()
+        uname_label.grid(row=1,column=0)
         
         self._uname_textfield = Entry(self.frame,width=40,border=5)
-        self._uname_textfield.pack()
+        self._uname_textfield.grid(row=2,column=0)
         
         password_label = Label(self.frame,text="enter password")
-        password_label.pack()
+        password_label.grid(row=3,column=0)
         self._password_textfield = Entry(self.frame,show='*',width=40,border=5)
-        self._password_textfield.pack()
+        self._password_textfield.grid(row=4,column=0)
         
         login_btn = Button(self.main_frame,text="login",width=38 ,command = self.verify_credentials)
-        login_btn.pack()
+        login_btn.grid(row=5,column=0)
         
    
     #settings menu 
@@ -71,42 +68,47 @@ class Gui():
         self.clear_frame()
         #creates canvas for cardio plot 
         canvas = Canvas(self.main_frame,width=300,height=200,bg='white')
-        canvas.pack()
+        canvas.grid(row=0,column=0)
         fig = Figure(figsize = (5, 5), dpi = 100)
         y = [i**2 for i in range(101)]
         # adding the subplot 
+        fig.suptitle("I'm just a poor graph from a poor family")
         plot1 = fig.add_subplot(111) 
-
+        
         # plotting the graph 
         plot1.plot(y) 
 
         # creating the Tkinter canvas 
         # containing the Matplotlib figure 
         output = FigureCanvasTkAgg(fig, master = canvas)
+        
         output.draw()
 
         # placing the canvas on the Tkinter window 
-        output.get_tk_widget().pack() 
+        output.get_tk_widget().grid(row=0,column=0) 
 
        
         
         
         #Combo drop down menu to select pacemaker mode
-        mode_label = Label(text="Pacemaker mode selection")
-        mode_label.pack()
+        mode_label = Label(self.main_frame,text="Pacemaker mode selection  ")
+        mode_label.grid(row=1,column=0)
+        
         current_val = StringVar()
-
         mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val)
-        mode_combo['values'] = ('mode1','mode2','mode3')
+        mode_combo['values'] = ('VVB','mode2','mode3')
         current_val = 'mode1' 
 
         mode_combo['state'] = 'readonly'
         mode_combo.set('mode1')
-        mode_combo.pack()
+        mode_combo.grid(row=1,column=1)
         
         
         self.encryption_button = Button(self.main_frame,text="Turn encryption ON",command=self.encrypt_button_switch)
-        self.encryption_button.pack()     
+        self.encryption_button.grid(row=2,column=1)     
+        
+        status_label = Label(self.main_frame,text="PACEMAKER STATUS")
+        status_label.grid(row=1,column=0)
 
         
     #encyrpt toggle btn function     
@@ -135,10 +137,9 @@ class Gui():
     def verify_credentials(self):
             
         
-        if load_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
+        if check_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
             
             print("terminal check")
-            #self.menu()
             server_thread1 = threading.Thread(target=self.c_server.create_server())
             server_thread1.daemon = True
             server_thread1.start()
@@ -153,7 +154,7 @@ class Gui():
     def create_main_frame(self):
         
         self.main_frame = Frame(self.main_window)
-        self.main_frame.pack(pady=50)
+        self.main_frame.grid(pady=50)
         self.login_menu()
 
 
@@ -161,7 +162,7 @@ class Gui():
 
 main_window = tk() 
 main_window.title("Cardio Client")
-main_window.geometry("400x300")
+main_window.geometry("300x500")
 gui = Gui(main_window)
 main_window.mainloop()
         

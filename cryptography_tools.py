@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from bcrypt import gensalt, kdf
 
-_key_path = "data/pacemakers/keys.json"
+_key_path = "data/keys.json"
 
 class Cryptography_tools:
     
@@ -21,12 +21,11 @@ class Cryptography_tools:
         
     def create_key(self):
         
-        _password= 'test'
-        _password_to_hash = _password.encode()
+        _password= gensalt(rounds=14)
         
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(),length=self._key_length, salt=self._salt,iterations=100000,backend=default_backend())
         
-        self._key = base64.urlsafe_b64encode(kdf.derive(_password_to_hash))
+        self._key = base64.urlsafe_b64encode(kdf.derive(_password))
         print(self._key)
     
       
@@ -54,39 +53,24 @@ class Cryptography_tools:
     #TODO fix bug with saving keys
     #TODO add load keys 
         
-    def load_save_key(self): 
+    def load_key(self,_key): 
         
         try:
             with open(_key_path,"r") as _read_file:
                     _data = js.load(_read_file)
                     _data = _data['shared_keys']
-                    print("writing to keys.json")
-                    for i in _data:
-                       if i["pacemaker_id"] >= 0:
-                           id = i["pacemaker_id"]
-                           id+=1
-                           _keys_dict = {"shared-keys":[{
-                                "pacemaker-id":_id,"shared_key":str(self._key)
-    
-                                }
-                            ]}
-            
-            
+                    print("reading from keys.json")
+                    for i in _data ["keys"]:
+                        _key = _data["key"]
+                        return _key
+                 
         except FileNotFoundError:
-            _id = 0
+            __key = self.create_key()
             with open(_key_path,"w",encoding="utf-8") as f:
                 
-                _keys_dict = {"shared-keys":[{
-                    "pacemaker-id":_id,"shared_key":str(self._key)
-    
-                    }
-                ]}
-
-                
-                
-                
-                {"pacemaker-id":_id,"shared_key":str(self._key)}
-                    
+                _keys_dict = {"keys-keys":[{
+                    "key":__key}
+                ]}                    
                     
                 
                 js.dump(_keys_dict, f,ensure_ascii=False,indent=4 )

@@ -20,7 +20,7 @@ def whitelist_input(string_to_whitelist):
 
 
 #pass username to check
-def load_user(username,password):
+def check_user(username,password):
     
     #loads user json data
     try:
@@ -31,9 +31,9 @@ def load_user(username,password):
         for x in data:
             if(x['username'] == username):
                 #remove return stmnt
-                return True
                 salt = x['salt']
-                stored_password = x['password']
+                stored_password = str(x['password'])
+                stored_password = stored_password.encode('utf-8')
                 print("salt type is ", type(salt))
                 hashed_password = hash_pwd(password,salt)
                 if(stored_password == hashed_password):

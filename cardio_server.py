@@ -1,5 +1,6 @@
 import sys
 import cryptography_tools
+import errno
 from pacemaker import Pacemaker
 import socket
 import threading
@@ -56,20 +57,22 @@ class Cardio_server():
         self._port = port_list[0]
         self._buff_size = 2048
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        
         #if port in use, try other ports 
         try:
             self.sock.bind((self._ip,self._port))
-        
-        except socket.gaierror:
             
-            for i in port_list:
-                self._port = port_list[i]
+        except socket.error as e:
+            if e.errno == errno.EADDRINUSE:
+                    print(("Port %s in use, using alternative port"%(str(self._port))))
+                    self._port = 10080
+                    self.sock.bind((self._ip,self._port))
+            
 
-            self.sock.bind((self._ip,self._port))
-
-        self.sock.listen(1)
-        self.connections =[]
-       
+            self.sock.listen(1)
+            print('Server running')
+            self.connections =[]
+        
         listener_thread = threading.Thread(target=self.client_listener)
         listener_thread.daemon = True
         listener_thread.start()
@@ -97,7 +100,8 @@ class Cardio_server():
                     print(x['pacemaker_id'])
                     pacemaker = Pacemaker(x['pacemaker_id'],c)
                     self.connections.append(pacemaker)
-                    print(str(self.connections[0]))
+                    client = self.connections[0]
+                    print(pacemaker.get_pacemaker_id())
             print(data)
 
             
