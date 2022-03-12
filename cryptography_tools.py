@@ -18,6 +18,7 @@ class Cryptography_tools:
         #bcrypt generates the salt
         self._salt = gensalt(rounds=14)
         self._key_length = 32
+        self.load_key()
         
     def create_key(self):
         
@@ -26,21 +27,18 @@ class Cryptography_tools:
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(),length=self._key_length, salt=self._salt,iterations=100000,backend=default_backend())
         
         self._key = base64.urlsafe_b64encode(kdf.derive(_password))
-        print(self._key)
+        return self._key
     
       
-        
-    #TODO each pacemaker has a unique ID and shared key, 
-    #TODO if no paceaker is stored. create  key 
     
     
     def encrypt(self,data):
         
-        data = str(data)
-        data_to_encrypt = data.encode()
+        data = data
+        self._key = self.load_key()
         self._fernet = Fernet(self._key)
-        self._encrypted_data = self._fernet.encrypt(bytes(data_to_encrypt,"utf-8"))
-        print ("encryoted data:",self._encrypted_data)
+        self._encrypted_data = self._fernet.encrypt(bytes(data,encoding="utf-8"))
+        print ("encrypted data:",self._encrypted_data)
         
         return self._encrypted_data
     
@@ -53,35 +51,43 @@ class Cryptography_tools:
     #TODO fix bug with saving keys
     #TODO add load keys 
         
-    def load_key(self,_key): 
-        
+    def load_key(self): 
+
+        #loads key if keys file exists 
+
         try:
             with open(_key_path,"r") as _read_file:
                     _data = js.load(_read_file)
-                    _data = _data['shared_keys']
+                    _data = _data['shared_key']
                     print("reading from keys.json")
-                    for i in _data ["keys"]:
-                        _key = _data["key"]
-                        return _key
-                 
+                    for i in _data:
+                        self._key = bytes(i["key"],encoding='utf-8')
+                        print("loaded key: ",self._key)
+                        return self._key
+
+
+        #if file does not exist creates json file and generates key     
         except FileNotFoundError:
-            __key = self.create_key()
+            self._key = self.create_key()
             with open(_key_path,"w",encoding="utf-8") as f:
-                
-                _keys_dict = {"keys-keys":[{
-                    "key":__key}
+                _key = str(_key,encoding='utf-8')
+                _keys_dict = {"shared_key":[{
+                    "key":_key}
                 ]}                    
                     
                 
                 js.dump(_keys_dict, f,ensure_ascii=False,indent=4 )
-                
-    
+
+test_data = "test"
+       
+
             
         
         
       
-        
-#key = Cryptography_tools()  
+    
+key = Cryptography_tools() 
+key.encrypt(test_data)
 
 #key.create_key()
 #key.encrypt()

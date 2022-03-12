@@ -32,9 +32,7 @@ def check_user(username,password):
             if(x['username'] == username):
                 #remove return stmnt
                 salt = x['salt']
-                stored_password = str(x['password'])
-                stored_password = stored_password.encode('utf-8')
-                print("salt type is ", type(salt))
+                stored_password = bytes(x['password'],encoding='utf-8')
                 hashed_password = hash_pwd(password,salt)
                 if(stored_password == hashed_password):
                     return True
@@ -65,8 +63,10 @@ def gen_salt():
     
 def hash_pwd(password,salt): 
     """ Pass password as string and salt as bites"""
+    password = bytes(password,encoding='utf-8')
+    salt = bytes(salt,encoding='utf-8')
     
-    hashed_pwd = bcrypt.hashpw(bytes(password,encoding='utf8'),salt)
+    hashed_pwd = bcrypt.hashpw(password,salt)
     
     return hashed_pwd
     

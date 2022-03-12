@@ -13,34 +13,29 @@ import json as js
 
 
 class Cardio_server():
-    
+
     def __init__(self):
-        pass
-        #ToDO whitelist the inputs
+        
+        #tcp_socket settings
+        self._tcp_ip = "127.0.0.1"
+        self._buff_size = 2048
+        self._tcp_port = 8080
+        self._tcp_sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        
     
-        #username = whitelist_input(input("Enter Username: ")) 
-        #password = whitelist_input(input('Enter Password: ')) 
-        
-        #print(username," ", password)
-        #self.server_running = False
-        #menu_thread = threading.Thread(target=self.menu)
-        #menu_thread.daemon = True
-        #menu_thread.start()
-        #menu_thread.join()
-        #self.create_server()
-        
-        
+   
+    #debug menu     
     def menu(self):
         print("Command List \n 1: exit\n 2: run server")
         while True:
             command = input("enter command:  ")
             if command == '1':
                 if self.server_running is False:
-                #self.sock.shutdown()
+                #self._tcp_sock.shutdown()
                     print("run server must be ran befoe shutting down ")
 
                 else:
-                    self.sock.close()
+                    self._tcp_sock.close()
                     sys.exit(0)
             if command == '2':
                 self.create_server()
@@ -49,29 +44,19 @@ class Cardio_server():
         
     def create_server(self):
         
-        port_list = (8080,10000,7777)
-        print("Server running")
-        self.server_running = True
-        #tcp socket
-        self._ip = '127.0.0.1'
-        self._port = port_list[0]
-        self._buff_size = 2048
-        self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        
         #if port in use, try other ports 
         try:
-            self.sock.bind((self._ip,self._port))
+            self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
             
         except socket.error as e:
             if e.errno == errno.EADDRINUSE:
-                    print(("Port %s in use, using alternative port"%(str(self._port))))
-                    self._port = 10080
-                    self.sock.bind((self._ip,self._port))
+                    print(("Port %s in use, using alternative port"%(str(self._tcp_port))))
+                    self._tcp_port = 1080
+                    self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
             
-
-            self.sock.listen(1)
-            print('Server running')
-            self.connections =[]
+        self.server_running = True
+        self._tcp_sock.listen(1)
+        print('Server running')
         
         listener_thread = threading.Thread(target=self.client_listener)
         listener_thread.daemon = True
@@ -116,16 +101,30 @@ class Cardio_server():
         
         while True:
             
-            c,a = self.sock.accept()
+            c,a = self._tcp_sock.accept()
             client_thread = threading.Thread(target=self.client_handler,args=(c,a))
             client_thread.daemon = True
             client_thread.start()
-            #self.connections.append(c)
-            #print(self.connections)
+           
             
-     
+    def send_msg(self,data):
+      
+        msg = js.dumps(msg)
+        self._tcp_sock.send(bytes(msg,'utf-8'))
+
+
             
+    def set_encrypt_on_off(self):
+
         
+        msg = {"data":[
+                {"header":"command",
+                    "encrypt_on/off":"off"}
+                ]
+            }
+        self.send_msg(msg) 
+
+        #create
         
 
        
