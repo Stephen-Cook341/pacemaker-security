@@ -1,4 +1,5 @@
 import  threading
+from turtle import bgcolor
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -6,11 +7,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolba
 from PIL import Image, ImageTk
 from tkinter import Tk as tk
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk    
 from numpy import integer
 from cardio_server import Cardio_server
 from tools import whitelist_input,check_user
 from cryptography_tools import *
+from tkmacosx import Button
 matplotlib.use('TkAgg')
 
 
@@ -38,23 +40,30 @@ class Gui():
 
         
     def login_menu(self):
+        title = Label(self.main_frame, text="Please enter login details",font=("Arial", 15))  
+        title.grid(row=1,column=0,padx=18,pady= 15),
 
+        uname_label = Label(self.main_frame,text="Username")
+        uname_label.grid(row=2,column=0,sticky=(W),padx=18),
         
-        uname_label = Label(self.main_frame,text="enter username",)
-        uname_label.grid(row=1,column=0)
+        uname_star = Label(self.main_frame,text="*", fg="red")
+        uname_star.grid(row=2,column=0,sticky=(W),padx=82),
+
+        self._uname_textfield = Entry(self.main_frame,width=25,border=2)
+        self._uname_textfield.grid(row=3,column=0)
         
-        self._uname_textfield = Entry(self.main_frame,width=25,border=5)
-        self._uname_textfield.grid(row=2,column=0)
+        password_label = Label(self.main_frame,text="Password")
+        password_label.grid(row=4,column=0,sticky=(W),padx=18)
+        uname_star = Label(self.main_frame,text="*", fg="red")
+        uname_star.grid(row=4,column=0,sticky=(W),padx=82),
+
+        self._password_textfield = Entry(self.main_frame,show='*',width=25,border=2)
+        self._password_textfield.grid(row=5,column=0)
         
-        password_label = Label(self.main_frame,text="enter password")
-        password_label.grid(row=3,column=0)
-        self._password_textfield = Entry(self.main_frame,show='*',width=25,border=5)
-        self._password_textfield.grid(row=4,column=0)
-        
-        login_btn = Button(self.main_frame,text="login",width=25 ,command = self.verify_credentials)
-        login_btn.grid(row=5,column=0)
-        
-   
+        login_btn = Button(self.main_frame,text="Login",width=232 ,command = self.verify_credentials)
+        login_btn.grid(row=6,column=0,padx= 20, pady= 25)
+        login_btn.config(fg="white", bg="blue")
+
     #settings menu 
     #TODO add status options
     #TODO add save telemetry to file option
@@ -86,11 +95,11 @@ class Gui():
         
         current_val = StringVar()
         mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val)
-        mode_combo['values'] = ('VVB','mode2','mode3')
-        current_val = 'mode1' 
+        mode_combo['values'] = ('VVI','AAI','DDD')
+        current_val = 'DDD' 
 
         mode_combo['state'] = 'readonly'
-        mode_combo.set('mode1')
+        mode_combo.set('DDD')
         mode_combo.grid(row=2,column=0)
         
         
@@ -172,6 +181,9 @@ class Gui():
 main_window = tk() 
 main_window.title("Cardio Client")
 main_window.geometry("500x800")
-gui = Gui(main_window)
+frame= Frame(main_window)
+frame.grid(pady=10)
+main_window.resizable(0, 0)
+gui = Gui(main_window)  
 main_window.mainloop()
         
