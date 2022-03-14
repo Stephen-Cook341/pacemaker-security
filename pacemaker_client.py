@@ -1,17 +1,15 @@
 import socket
 import json as js
+from time import sleep
+import cryptography_tools
+import threading
+import neurokit
 
-import cryptography
-
-from cryptography_tools import Cryptography_tools
-#TODO add boolean to encrypt or not
 class Pacemaker_model():
     
     def __init__(self):
         
         
-        crypto_tools = Cryptography_tools()
-        crypto_tools.create_key()
         
         #define socket, port and IP
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
@@ -21,13 +19,28 @@ class Pacemaker_model():
         self.mode = ""
         self.lower_threshold = 0 
         self.higher_threshold = 0
-        self.battery_capacity = 3500
-        #self.battery_current_charge 
+        
+        #initiliazes battery settings 
+        self.capacity = float(30.00) # battery capacity in AH
+
+        #sets discharge rate, increase rate when encrypt/decrypt 
+        self.discharge_rate = float((self.capacity/100)/2)
+        battery_thread = threading.Thread(target=self.battery_sim)
+        battery_thread.daemon = True
+        battery_thread.start()
+
         self.encrypt = True
         self.connect_to_server()
-        self.client_listener()
-        
-         
+
+    # simulates the battery being used   
+    def battery_sim(self):
+
+        current_battery_charge = self.capacity
+
+        while True:
+            sleep(5)
+            current_battery_charge = (current_battery_charge - self.discharge_rate)
+            print(current_battery_charge/self.capacity*100)  
             
     def decrypt_command(self):
         #run the decrypt function here
@@ -41,19 +54,25 @@ class Pacemaker_model():
     #connects to server 
     def connect_to_server(self):
        
-        
         try:
             self.sock.connect((self._ip,self._port))
+
 
         except socket.error as error:
             print("Using alt port")
             self._port = 10080
             self.sock.connect((self._ip,self._port))
 
+        print("connected")
+        self.client_listener()
+
+
     def dummy_fuc():
         
         key = Cryptography_tools.load_save_key()
-    #listener for dat from server         
+
+
+    #listener for data from server         
     def client_listener(self):
         
         while True: 

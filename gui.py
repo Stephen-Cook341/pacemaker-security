@@ -1,4 +1,3 @@
-from cProfile import label
 import  threading
 import matplotlib
 import matplotlib.pyplot as plt
@@ -8,15 +7,11 @@ from PIL import Image, ImageTk
 from tkinter import Tk as tk
 from tkinter import *
 from tkinter import ttk
-
 from numpy import integer
 from cardio_server import Cardio_server
 from tools import whitelist_input,check_user
 from cryptography_tools import *
 matplotlib.use('TkAgg')
-#TODO add encrypt, datagrams, history, fix password login
-#TODO put server in its own thread
-#TODO  add cnavas fro graph and then add plot to fig
 
 
 class Gui():
@@ -38,6 +33,7 @@ class Gui():
         
         
     def server_wrapper(self):
+
         self.c_server = Cardio_server()
 
         
@@ -61,7 +57,6 @@ class Gui():
    
     #settings menu 
     #TODO add status options
-    #TODO add lower and upperthreshold selection
     #TODO add save telemetry to file option
     def menu(self):
         
@@ -72,7 +67,7 @@ class Gui():
         fig = Figure(figsize = (5, 5), dpi = 100)
         y = [i**2 for i in range(101)]
         # adding the subplot 
-        fig.suptitle("I'm just a poor graph from a poor family")
+        fig.suptitle("Pacemaker history")
         plot1 = fig.add_subplot(111) 
         
         # plotting the graph 
@@ -81,15 +76,10 @@ class Gui():
         # creating the Tkinter canvas 
         # containing the Matplotlib figure 
         output = FigureCanvasTkAgg(fig, master = canvas)
-        
         output.draw()
-
-        # placing the canvas on the Tkinter window 
         output.get_tk_widget().grid(row=0,column=0) 
 
        
-        
-        
         #Combo drop down menu to select pacemaker mode
         mode_label = Label(self.main_frame,text="Pacemaker mode selection  ")
         mode_label.grid(row=1,column=0)
@@ -123,12 +113,14 @@ class Gui():
     def encrypt_button_switch(self):
     
         if(self.encryption_on == False):
+
             self.encryption_on = True
             self.encryption_button.config(text="Turn encryption OFF")
             print("encrypt is",self.encryption_on)
             self.c_server.set_encrypt_on_off(self.encryption_on)
             
         else:
+
             self.encryption_on = False
             self.encryption_button.config(text="Turn encryption ON")
             print("encrypt is",self.encryption_on)
@@ -138,22 +130,29 @@ class Gui():
     #clears the primary frame    
     def clear_frame(self):
         
-        
         frame_info = self.main_frame.winfo_children()
         for widget in frame_info:
             widget.destroy()
         
         
+
     def verify_credentials(self):
-            
-        if check_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
-            
-            print("terminal check")
-            server_thread1 = threading.Thread(target=self.c_server.create_server())
-            server_thread1.daemon = True
-            server_thread1.start()
+
+
+        if(len(self._password_textfield.get()) >= 8 ):
+          
+            if check_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
+                
+                server_thread1 = threading.Thread(target=self.c_server.create_server())
+                server_thread1.daemon = True
+                server_thread1.start()
+                self.menu()
+            else:
+                label = Label(self.main_frame,text="Incorrect credentials")
+                label.grid(row=6,column=0)
+
         else:
-            label = Label(self.main_frame,text="Incorrect credentials")
+            label = Label(self.main_frame,text="password length must be greater than 8")
             label.grid(row=6,column=0)
                         
         
@@ -163,8 +162,6 @@ class Gui():
         
         self.main_frame = Frame(self.main_window)
         self.main_frame.grid()
-    
-
         self.login_menu()
 
 

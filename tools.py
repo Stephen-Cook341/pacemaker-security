@@ -14,7 +14,7 @@ file = "data/user.json"
 def whitelist_input(string_to_whitelist):
     
     #add addtitonal char to whielist 
-    new_string = re.sub('[^a-zA-Z0-9]', '',string_to_whitelist)
+    new_string = re.sub('[^a-zA-Z0-9$@!./\+_]', '',string_to_whitelist)
         
     return new_string
 

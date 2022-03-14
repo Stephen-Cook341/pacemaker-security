@@ -18,7 +18,7 @@ class Cryptography_tools:
         #bcrypt generates the salt
         self._salt = gensalt(rounds=14)
         self._key_length = 32
-        self.load_key()
+        #self.load_key()
         
     def create_key(self):
         
@@ -48,13 +48,10 @@ class Cryptography_tools:
         return data
         
         
-    #TODO fix bug with saving keys
-    #TODO add load keys 
         
     def load_key(self): 
 
         #loads key if keys file exists 
-
         try:
             with open(_key_path,"r") as _read_file:
                     _data = js.load(_read_file)
@@ -78,18 +75,10 @@ class Cryptography_tools:
                 
                 js.dump(_keys_dict, f,ensure_ascii=False,indent=4 )
 
-test_data = "test"
        
 
             
         
         
       
-    
-key = Cryptography_tools() 
-key.encrypt(test_data)
-
-#key.create_key()
-#key.encrypt()
- 
     
