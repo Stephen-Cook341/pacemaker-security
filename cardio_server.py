@@ -1,10 +1,12 @@
+from base64 import encode
 import sys
-import cryptography_tools
+from cryptography_tools import Cryptography_tools
 import errno
 from pacemaker import Pacemaker
 import socket
 import threading
 import json as js
+import chardet
 #Shared key encryption scheme and Diffiehelman
 
 #TODO Stretch Goal: Store user credentials and pacemaker history
@@ -18,10 +20,11 @@ class Cardio_server():
         
         #tcp_socket settings
         self._tcp_ip = "127.0.0.1"
-        self._buff_size = 2048
+        self._buff_size = 8196
         self._tcp_port = 8080
         self._tcp_sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        
+        self.crypto_tools = Cryptography_tools() 
+        self.connections = []  
     
    
     #debug menu     
@@ -51,7 +54,7 @@ class Cardio_server():
         except socket.error as e:
             if e.errno == errno.EADDRINUSE:
                     print(("Port %s in use, using alternative port"%(str(self._tcp_port))))
-                    self._tcp_port = 1080
+                    self._tcp_port = 10080
                     self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
             
         self.server_running = True
@@ -70,8 +73,7 @@ class Cardio_server():
         
         while True:
             data = c.recv(self._buff_size)
-            #for connection in self.connections:
-                #connection.send(data)
+          
             if not data:
                 print('Pacemaker: ',c," is disconnected")
                 break
@@ -83,10 +85,6 @@ class Cardio_server():
             #if header is id print id and save to list 
                 if str(x['header']) == 'pacemaker_identity':
                     print(x['pacemaker_id'])
-                    pacemaker = Pacemaker(x['pacemaker_id'],c)
-                    self.connections.append(pacemaker)
-                    client = self.connections[0]
-                    print(pacemaker.get_pacemaker_id())
             print(data)
 
             
@@ -102,29 +100,45 @@ class Cardio_server():
         while True:
             
             c,a = self._tcp_sock.accept()
+            print("client",c," connected")
+            self.connections.append(c)
+
             client_thread = threading.Thread(target=self.client_handler,args=(c,a))
             client_thread.daemon = True
             client_thread.start()
            
             
     def send_msg(self,data):
-      
-        msg = js.dumps(msg)
-        self._tcp_sock.send(bytes(msg,'utf-8'))
-
+          for connection in self.connections:
+            
+            msg = str(data,encoding='utf-8')
+            connection.send(bytes(msg,encoding='utf-8'))
+           
+    
+   
 
             
-    def set_encrypt_on_off(self):
-
+    def set_encrypt_on_off(self,encrypt):
+        if encrypt == False:
+            
         
-        msg = {"data":[
-                {"header":"command",
-                    "encrypt_on/off":"off"}
-                ]
-            }
-        self.send_msg(msg) 
+            data = {"data":[
+                    {"header":"command", "command_name": "set_encryption",
+                        "value":False}
+                    ]
+                }
+            
+        if encrypt == True:
+            data = {"data":[
+                    {"header":"command", "command_name": "set_encryption",
+                        "value":True}
+                    ]
+                }
+        data  = js.dumps(data)
+        data = self.crypto_tools.encrypt(data)
 
-        #create
+        self.send_msg(data) 
+
         
 
        

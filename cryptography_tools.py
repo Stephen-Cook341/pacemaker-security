@@ -32,19 +32,22 @@ class Cryptography_tools:
       
     
     
-    def encrypt(self,data):
+    def encrypt(self,data_to_encrypt):
         
-        data = data
+        data = data_to_encrypt
         self._key = self.load_key()
         self._fernet = Fernet(self._key)
-        self._encrypted_data = self._fernet.encrypt(bytes(data,encoding="utf-8"))
-        print ("encrypted data:",self._encrypted_data)
+        data = self._fernet.encrypt(bytes(data,encoding="utf-8"))
+        #print ("encrypted data:",self._encrypted_data)
         
-        return self._encrypted_data
+        return data
     
-    def decrypt(self,data):
-        data = self._fernet.decrypt(bytes(self._encrypted_data,'utf-8'))
-        print("decrypted data: ",data)
+    def decrypt(self,encrypted_data):
+        data = encrypted_data
+        self._key = self.load_key()
+        self._fernet = Fernet(self._key)
+        data = self._fernet.decrypt(data)
+        #print("decrypted data: ",data)
         return data
         
         

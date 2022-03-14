@@ -124,6 +124,8 @@ class Gui():
             self.encryption_on = False
             self.encryption_button.config(text="Turn encryption ON")
             print("encrypt is",self.encryption_on)
+            self.c_server.set_encrypt_on_off(self.encryption_on)
+
 
     
         

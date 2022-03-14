@@ -1,9 +1,9 @@
+from crypt import crypt
 import socket
 import json as js
 from time import sleep
-import cryptography_tools
+from cryptography_tools import Cryptography_tools
 import threading
-import neurokit
 
 class Pacemaker_model():
     
@@ -15,6 +15,7 @@ class Pacemaker_model():
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
         self._ip = '127.0.0.1'
         self._port = 8080
+        self._buff_size = 8196
         
         self.mode = ""
         self.lower_threshold = 0 
@@ -28,7 +29,8 @@ class Pacemaker_model():
         battery_thread = threading.Thread(target=self.battery_sim)
         battery_thread.daemon = True
         battery_thread.start()
-
+        
+        self.crypto_tools = Cryptography_tools()
         self.encrypt = True
         self.connect_to_server()
 
@@ -66,53 +68,51 @@ class Pacemaker_model():
         print("connected")
         self.client_listener()
 
-
-    def dummy_fuc():
         
-        key = Cryptography_tools.load_save_key()
 
 
     #listener for data from server         
     def client_listener(self):
-        
+        print("client listnener running")
         while True: 
-            data = self.sock.recv(2048)
+            data = self.sock.recv(self._buff_size)
+            print("data is ",data)
+            
+            #if encrypt is true decrypt message 
             if(self.encrypt):
                 #decrypt
-                print(data)
-            else:
-                print(data)
-                pass
+                data = self.crypto_tools.decrypt(data)
+                print("decrypted data",data)
+                
+           
+            data = js.loads(str(data,encoding="utf-8"))
             
             
-            
-            data = js.loads(str(data,"utf-8"))
             data = data['data']
+                
             for x in data:
                 
             #if header is command get command and value before passing it 
                 if str(x['header']) == 'command':
-                    print(x['command_name'])
-                    called_func = x['call_function']
-                    func_value = x['value']
+                    print(x['command_name'],x["value"])
             if not data:
                 break
             
             
     #send data function 
     def send_msg(self,data):
-        pacemaker_id = 5
         
         if(self.encrypt):
-            pass
+            data = str(data)
+            data = self.crypto_tools.encrypt(data)
             #data = Cryptography_tools.encrypt(data)
             #here is where the battery would be impacted
         else:
             data = data
-            pass
+        
         msg = {"data":[
                 {"header":"pacemaker_identity",
-                        "pacemaker_id":pacemaker_id}
+                        "pacemaker_id":"test_maker"}
                 ]
             }
         msg = js.dumps(msg)
