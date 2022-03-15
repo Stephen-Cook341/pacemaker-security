@@ -1,5 +1,7 @@
 from base64 import encode
 import sys
+
+from rsa import encrypt
 from cryptography_tools import Cryptography_tools
 import errno
 from pacemaker import Pacemaker
@@ -55,6 +57,7 @@ class Cardio_server():
             if e.errno == errno.EADDRINUSE:
                     print(("Port %s in use, using alternative port"%(str(self._tcp_port))))
                     self._tcp_port = 10080
+                    print("using port: ",self._tcp_port)
                     self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
             
         self.server_running = True
@@ -77,17 +80,28 @@ class Cardio_server():
             if not data:
                 print('Pacemaker: ',c," is disconnected")
                 break
+
             #converts from bytes back to json
             data = js.loads(str(data,"utf-8"))
             data = data['data']
             for x in data:
                 
             #if header is id print id and save to list 
-                if str(x['header']) == 'pacemaker_identity':
-                    print(x['pacemaker_id'])
-            print(data)
+                if (x['header'] == 'pacemaker_identity'):
+                    print("pacemaker id is ",x['pacemaker_id'])
+                if(x['header'] == "update"):
+                        mode = x["mode"]
+                        battery = x["battery"]
+                        pace = x["pace"]
+                        encrypt_status = x["encryption"]
 
-            
+                        self.update_gui(mode,battery,pace,encrypt_status)
+
+            print(data)
+    #returns vars for gui to update
+    def update_gui(self,mode,battery,pace,encrypt_status):
+        return mode,battery,pace,encrypt_status
+
     def decode_message(self,data):
         
         pass
@@ -119,6 +133,8 @@ class Cardio_server():
 
             
     def set_encrypt_on_off(self,encrypt):
+
+
         if encrypt == False:
             
         
@@ -134,6 +150,10 @@ class Cardio_server():
                         "value":True}
                     ]
                 }
+
+
+
+
         data  = js.dumps(data)
         data = self.crypto_tools.encrypt(data)
 

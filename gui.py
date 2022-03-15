@@ -1,5 +1,5 @@
 import  threading
-from turtle import bgcolor
+from turtle import bgcolor, width
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -40,82 +40,124 @@ class Gui():
 
         
     def login_menu(self):
-        title = Label(self.main_frame, text="Please enter login details",font=("Arial", 15))  
+        title = Label(self.main_frame, text="Please enter login details",font=("Arial", 15,'bold'),bg='white')  
         title.grid(row=1,column=0,padx=18,pady= 15),
 
-        uname_label = Label(self.main_frame,text="Username")
-        uname_label.grid(row=2,column=0,sticky=(W),padx=18),
+        uname_label = Label(self.main_frame,text="Username",width=20,bg="white")
+        uname_label.grid(row=2,column=0,sticky=(N),padx=330),
         
-        uname_star = Label(self.main_frame,text="*", fg="red")
-        uname_star.grid(row=2,column=0,sticky=(W),padx=82),
+        uname_star = Label(self.main_frame,text="*", fg="Black",bg="white")
+        uname_star.grid(row=2,column=0,sticky=(E),padx=350),
 
-        self._uname_textfield = Entry(self.main_frame,width=25,border=2)
-        self._uname_textfield.grid(row=3,column=0)
+        self._uname_textfield = Entry(self.main_frame,width=25,border=2,borderwidth=5,highlightbackground="black")
+        self._uname_textfield.grid(row=3,column=0,sticky=(N))
         
-        password_label = Label(self.main_frame,text="Password")
-        password_label.grid(row=4,column=0,sticky=(W),padx=18)
-        uname_star = Label(self.main_frame,text="*", fg="red")
-        uname_star.grid(row=4,column=0,sticky=(W),padx=82),
+        password_label = Label(self.main_frame,text="Password",width=20,bg="white")
+        password_label.grid(row=4,column=0,sticky=(N),padx=330)
 
-        self._password_textfield = Entry(self.main_frame,show='*',width=25,border=2)
-        self._password_textfield.grid(row=5,column=0)
+        uname_star = Label(self.main_frame,text="*", fg="Black",bg="white")
+        uname_star.grid(row=4,column=0,sticky=(E),padx=350),
+
+        self._password_textfield = Entry(self.main_frame,show='*',width=25,borderwidth=5,highlightbackground="black")
+        self._password_textfield.grid(row=5,column=0,sticky=(N))
         
-        login_btn = Button(self.main_frame,text="Login",width=232 ,command = self.verify_credentials)
-        login_btn.grid(row=6,column=0,padx= 20, pady= 25)
-        login_btn.config(fg="white", bg="blue")
+        login_btn = Button(self.main_frame,text="Login",font='bold',width=232 ,command = self.verify_credentials)
+        login_btn.grid(row=6,column=0,padx= 20,sticky=(N),pady= 25)
+        login_btn.config(fg="black", bg="white")
 
     #settings menu 
     #TODO add status options
     #TODO add save telemetry to file option
+    #TODO make create graph function
     def menu(self):
         
         self.clear_frame()
         #creates canvas for cardio plot 
-        canvas = Canvas(self.main_frame,width=300,height=200,bg='white')
-        canvas.grid(row=0,column=0)
-        fig = Figure(figsize = (5, 5), dpi = 100)
+        canvas = Canvas(self.main_frame,width=500,height=200,bg='white')
+        canvas.grid(row=0,column=0,sticky=(W),padx=0)
+        
+        self.fig = Figure(figsize = (10, 2), dpi = 100)
         y = [i**2 for i in range(101)]
         # adding the subplot 
-        fig.suptitle("Pacemaker history")
-        plot1 = fig.add_subplot(111) 
+        self.fig.suptitle("Pacemaker history")
+        plot1 = self.fig.add_subplot(111) 
         
         # plotting the graph 
         plot1.plot(y) 
 
         # creating the Tkinter canvas 
-        # containing the Matplotlib figure 
-        output = FigureCanvasTkAgg(fig, master = canvas)
+        # containing the Matplotlib self.figure 
+        output = FigureCanvasTkAgg(self.fig, master = canvas)
         output.draw()
-        output.get_tk_widget().grid(row=0,column=0) 
+        output.get_tk_widget().grid(row=0,column=0,sticky=(W)) 
 
        
+        settings_label = Label(self.main_frame,text="SETTINGS",bg='white',font=("Arial 10 underline"))
+        settings_label.grid(row=1,column=0,sticky=(N),pady=50,padx=300)
+
         #Combo drop down menu to select pacemaker mode
-        mode_label = Label(self.main_frame,text="Pacemaker mode selection  ")
-        mode_label.grid(row=1,column=0)
+        mode_label = Label(self.main_frame,text="Pacemaker mode selection  ",bg='white')
+        mode_label.grid(row=2,column=0,sticky=(W))
         
         current_val = StringVar()
-        mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val)
+        mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val,width=10)
         mode_combo['values'] = ('VVI','AAI','DDD')
         current_val = 'DDD' 
 
         mode_combo['state'] = 'readonly'
         mode_combo.set('DDD')
-        mode_combo.grid(row=2,column=0)
+        mode_combo.grid(row=2,column=0,sticky=(W),padx=300)
+
+        set_mode_btn = Button(self.main_frame,text="set mode",bg="White",font=("Arial 10 bold"))
+        set_mode_btn.grid(row=2,column=0,sticky=(W),padx=400)
         
+        set_encrypt_label = Label(self.main_frame,text="Set encryption",bg='white')
+        set_encrypt_label.grid(row=4,column=0,sticky=(W))
         
-        self.encryption_button = Button(self.main_frame,text="Turn encryption OFF",command=self.encrypt_button_switch)
-        self.encryption_button.grid(row=3,column=0)     
+        self.encryption_button = Button(self.main_frame,text="Turn encryption OFF",bg='white',command=self.encrypt_button_switch,font=("Arial 10 bold"))
+        self.encryption_button.grid(row=4,column=0,sticky=(W),padx=300)     
 
         #allows the user sets the lower activation threshold for the pacemaker 
-        lwr_threshold_label = Label(self.main_frame,text="Set Lower Activation Threshold")
-        lwr_threshold_label.grid(row=4,column=0)
-        lwr_threshold = integer
-        scale = Scale(self.main_frame,variable=lwr_threshold,orient='horizontal',width=20)
-        scale.grid(row=5,column=0)
+        set_pacing = Label(self.main_frame,text="Set pacing",bg='white')
+        set_pacing.grid(row=5,column=0,sticky=(W))
+        set_pacing = integer
+       
+        scale = Scale(self.main_frame,from_=0,to=100,variable=set_pacing,sliderrelief='flat', orient="horizontal", highlightthickness=0,tickinterval=100, width=10,sliderlength=10,bg='white',fg='black')
+        scale.grid(row=5,column=0,sticky=(W),padx=300)
+
+        set_pacing = Button(self.main_frame,text="Set Pacing",bg='white',command=self.encrypt_button_switch,font=("Arial 10 bold"))
+        set_pacing.grid(row=5,column=0,sticky=(W),padx=400)     
+
+        #pacemaker status updates menu labels 
+        status_label = Label(self.main_frame,text="PACEMAKER STATUS",bg='white',font=("Arial 10 underline"))
+        status_label.grid(row=6,column=0,sticky=(N),pady=50,padx=300)
+
+        current_mode = Label(self.main_frame,text="Pacemaker current Mode: ",bg='white')
+        current_mode.grid(row=7,column=0,sticky=(W))
+
+        current_battery = Label(self.main_frame,text="current battery: ",bg='white')
+        current_battery.grid(row=8,column=0,sticky=(W))
+
+        current_pacing = Label(self.main_frame,text="current pacing: ",bg='white')
+        current_pacing.grid(row=9,column=0,sticky=(W))
+
+        encrypt_status = Label(self.main_frame,text="encrypt status: ",bg='white')
+        encrypt_status.grid(row=10,column=0,sticky=(W))
 
 
-        status_label = Label(self.main_frame,text="PACEMAKER STATUS")
-        status_label.grid(row=6,column=0)
+    #dummy values 
+        self.mode_label = Label(self.main_frame,text="AAI",bg="White",font=("Arial 10 bold"))
+        self.mode_label.grid(row=7,column=0,sticky=(W),padx=400)
+        self.fig.suptitle("AAI Mode")
+
+        bat_label = Label(self.main_frame,text="82%",bg="White",font=("Arial 10 bold"))
+        bat_label.grid(row=8,column=0,sticky=(W),padx=400)
+
+        pace = Label(self.main_frame,text="60",bg="White",font=("Arial 10 bold"))
+        pace.grid(row=9,column=0,sticky=(W),padx=400)
+        
+        encr = Label(self.main_frame,text="ON",bg="White",font=("Arial 10 bold"))
+        encr.grid(row=10,column=0,sticky=(W),padx=400)
 
         
     #encyrpt toggle btn function     
@@ -159,19 +201,19 @@ class Gui():
                 server_thread1.start()
                 self.menu()
             else:
-                label = Label(self.main_frame,text="Incorrect credentials")
-                label.grid(row=6,column=0)
+                label = Label(self.main_frame,text="Incorrect credentials",bg="white")
+                label.grid(row=6,column=0,pady=50)
 
         else:
-            label = Label(self.main_frame,text="password length must be greater than 8")
-            label.grid(row=6,column=0)
+            label = Label(self.main_frame,text="password length must be greater than 8",bg="white")
+            label.grid(row=6,column=0,pady=50)
                         
         
        
         
     def create_main_frame(self):
         
-        self.main_frame = Frame(self.main_window)
+        self.main_frame = Frame(self.main_window,bg="WHITE")
         self.main_frame.grid()
         self.login_menu()
 
@@ -180,10 +222,9 @@ class Gui():
 
 main_window = tk() 
 main_window.title("Cardio Client")
-main_window.geometry("500x800")
-frame= Frame(main_window)
-frame.grid(pady=10)
+main_window.geometry("800x700")
 main_window.resizable(0, 0)
+main_window.config(bg="WHITE")
 gui = Gui(main_window)  
 main_window.mainloop()
         
