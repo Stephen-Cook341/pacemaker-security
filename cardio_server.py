@@ -1,25 +1,22 @@
-from base64 import encode
-import sys
 
 from rsa import encrypt
 from cryptography_tools import Cryptography_tools
-import errno
 from pacemaker import Pacemaker
+from base64 import encode
+import sys
+import errno
 import socket
 import threading
 import json as js
 import chardet
-#Shared key encryption scheme and Diffiehelman
 
-#TODO Stretch Goal: Store user credentials and pacemaker history
-
-#diffelman, Encrypt and decrypt on Pacemaker and client 
+#debug boolean disabled by default 
+debug = False
 
 
 class Cardio_server():
 
     def __init__(self):
-        
         #tcp_socket settings
         self._tcp_ip = "127.0.0.1"
         self._buff_size = 8196
@@ -27,10 +24,15 @@ class Cardio_server():
         self._tcp_sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.crypto_tools = Cryptography_tools() 
         self.connections = []  
+        
+        #if debug enabled run basic interface 
+        if(debug == True):
+            self.basic_menu
     
    
     #debug menu     
-    def menu(self):
+    def basic_menu(self):
+        
         print("Command List \n 1: exit\n 2: run server")
         while True:
             command = input("enter command:  ")
@@ -48,22 +50,25 @@ class Cardio_server():
         
         
     def create_server(self):
-        
-        #if port in use, try other ports 
+        #creates server 
+        #if port in use, attempts to bind alternative port 
         try:
             self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
             
         except socket.error as e:
+            # if error is address in use self._tcp_port equals alternative port 
             if e.errno == errno.EADDRINUSE:
                     print(("Port %s in use, using alternative port"%(str(self._tcp_port))))
                     self._tcp_port = 10080
                     print("using port: ",self._tcp_port)
                     self._tcp_sock.bind((self._tcp_ip,self._tcp_port))
-            
+                    
+        #server running boolean, limits connections to 1 client 
         self.server_running = True
         self._tcp_sock.listen(1)
         print('Server running')
         
+        #runs client listener on its own thread 
         listener_thread = threading.Thread(target=self.client_listener)
         listener_thread.daemon = True
         listener_thread.start()
@@ -72,8 +77,7 @@ class Cardio_server():
         
     #handles client connections
     def client_handler(self,c,a):
-        
-        
+        #listens for data from client if no data client disconnected
         while True:
             data = c.recv(self._buff_size)
           
@@ -84,11 +88,15 @@ class Cardio_server():
             #converts from bytes back to json
             data = js.loads(str(data,"utf-8"))
             data = data['data']
-            for x in data:
-                
+            
+            #loops through data if header equal inital coonection from client get pacemaker ID 
+            for x in data:    
             #if header is id print id and save to list 
                 if (x['header'] == 'pacemaker_identity'):
                     print("pacemaker id is ",x['pacemaker_id'])
+                    #TODO add save to list 
+                
+                #this is the gui will recieve the update from the client
                 if(x['header'] == "update"):
                         mode = x["mode"]
                         battery = x["battery"]

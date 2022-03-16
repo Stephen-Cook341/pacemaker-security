@@ -20,11 +20,9 @@ class Gui():
     
     
     def __init__(self,main_window):
-          
-        #load settings hear 
         #encryption is on by default 
         self.encryption_on = True
-        
+        #runs the cardio server on a seperate thread 
         server_thread = threading.Thread(target=self.server_wrapper)
         server_thread.daemon = True
         server_thread.start()
@@ -33,34 +31,34 @@ class Gui():
         self.create_main_frame()
        
         
-        
+    #wrapper function that allows the cardio srver to be ran in its own thread   
     def server_wrapper(self):
 
         self.c_server = Cardio_server()
 
         
     def login_menu(self):
+        #sets title of login menu 
         title = Label(self.main_frame, text="Please enter login details",font=("Arial", 15,'bold'),bg='white')  
         title.grid(row=1,column=0,padx=18,pady= 15),
-
+        
+        #creates username label,entry box and *  
         uname_label = Label(self.main_frame,text="Username",width=20,bg="white")
         uname_label.grid(row=2,column=0,sticky=(N),padx=330),
-        
         uname_star = Label(self.main_frame,text="*", fg="Black",bg="white")
         uname_star.grid(row=2,column=0,sticky=(E),padx=350),
-
         self._uname_textfield = Entry(self.main_frame,width=25,border=2,borderwidth=5,highlightbackground="black")
         self._uname_textfield.grid(row=3,column=0,sticky=(N))
-        
+
+        #creates password label,entry box and *  
         password_label = Label(self.main_frame,text="Password",width=20,bg="white")
         password_label.grid(row=4,column=0,sticky=(N),padx=330)
-
         uname_star = Label(self.main_frame,text="*", fg="Black",bg="white")
         uname_star.grid(row=4,column=0,sticky=(E),padx=350),
-
         self._password_textfield = Entry(self.main_frame,show='*',width=25,borderwidth=5,highlightbackground="black")
         self._password_textfield.grid(row=5,column=0,sticky=(N))
         
+        #crreates login button and sets command to verify_credentials 
         login_btn = Button(self.main_frame,text="Login",font='bold',width=232 ,command = self.verify_credentials)
         login_btn.grid(row=6,column=0,padx= 20,sticky=(N),pady= 25)
         login_btn.config(fg="black", bg="white")
@@ -89,31 +87,29 @@ class Gui():
         # containing the Matplotlib self.figure 
         output = FigureCanvasTkAgg(self.fig, master = canvas)
         output.draw()
-        output.get_tk_widget().grid(row=0,column=0,sticky=(W)) 
-
-       
+        output.get_tk_widget().grid(row=0,column=0,sticky=(W),padx=0) 
+        
+        #creates settings label 
         settings_label = Label(self.main_frame,text="SETTINGS",bg='white',font=("Arial 10 underline"))
-        settings_label.grid(row=1,column=0,sticky=(N),pady=50,padx=300)
+        settings_label.grid(row=1,column=0,sticky=(N),pady=50,padx=200)
 
         #Combo drop down menu to select pacemaker mode
         mode_label = Label(self.main_frame,text="Pacemaker mode selection  ",bg='white')
         mode_label.grid(row=2,column=0,sticky=(W))
-        
-        current_val = StringVar()
-        mode_combo = ttk.Combobox(self.main_frame,textvariable=current_val,width=10)
-        mode_combo['values'] = ('VVI','AAI','DDD')
-        current_val = 'DDD' 
-
-        mode_combo['state'] = 'readonly'
-        mode_combo.set('DDD')
-        mode_combo.grid(row=2,column=0,sticky=(W),padx=300)
-
-        set_mode_btn = Button(self.main_frame,text="set mode",bg="White",font=("Arial 10 bold"))
+        self.current_val = StringVar()
+        self.mode_combo = ttk.Combobox(self.main_frame,textvariable=self.current_val,width=10)
+        #sets drop down values 
+        self.mode_combo['values'] = ('VVI','AAI','DDD')
+        self.current_val = 'DDD' 
+        self.mode_combo['state'] = 'readonly'
+        self.mode_combo.set(self.current_val)
+        self.mode_combo.grid(row=2,column=0,sticky=(W),padx=300)
+        set_mode_btn = Button(self.main_frame,text="set mode",bg="White",font=("Arial 10 bold"),command=self.set_mode)
         set_mode_btn.grid(row=2,column=0,sticky=(W),padx=400)
         
+        #creates encryption label and toggle button 
         set_encrypt_label = Label(self.main_frame,text="Set encryption",bg='white')
         set_encrypt_label.grid(row=4,column=0,sticky=(W))
-        
         self.encryption_button = Button(self.main_frame,text="Turn encryption OFF",bg='white',command=self.encrypt_button_switch,font=("Arial 10 bold"))
         self.encryption_button.grid(row=4,column=0,sticky=(W),padx=300)     
 
@@ -130,7 +126,7 @@ class Gui():
 
         #pacemaker status updates menu labels 
         status_label = Label(self.main_frame,text="PACEMAKER STATUS",bg='white',font=("Arial 10 underline"))
-        status_label.grid(row=6,column=0,sticky=(N),pady=50,padx=300)
+        status_label.grid(row=6,column=0,sticky=(N),pady=50,padx=200)
 
         current_mode = Label(self.main_frame,text="Pacemaker current Mode: ",bg='white')
         current_mode.grid(row=7,column=0,sticky=(W))
@@ -143,7 +139,6 @@ class Gui():
 
         encrypt_status = Label(self.main_frame,text="encrypt status: ",bg='white')
         encrypt_status.grid(row=10,column=0,sticky=(W))
-
 
     #dummy values 
         self.mode_label = Label(self.main_frame,text="AAI",bg="White",font=("Arial 10 bold"))
@@ -162,7 +157,7 @@ class Gui():
         
     #encyrpt toggle btn function     
     def encrypt_button_switch(self):
-    
+        #if encryption is false sets encryption to true and chnages encrypt button value sends encrypt command to client 
         if(self.encryption_on == False):
 
             self.encryption_on = True
@@ -171,7 +166,7 @@ class Gui():
             self.c_server.set_encrypt_on_off(self.encryption_on)
             
         else:
-
+            #if encryption is TRue sets encryption to False and chnages encrypt button value sends encrypt command to client 
             self.encryption_on = False
             self.encryption_button.config(text="Turn encryption ON")
             print("encrypt is",self.encryption_on)
@@ -187,13 +182,12 @@ class Gui():
         for widget in frame_info:
             widget.destroy()
         
-        
+    def set_mode(self):
+        print(self.mode_combo.get())
 
     def verify_credentials(self):
-
-
+        #if string lenght is greater or equal to 8 will check username 
         if(len(self._password_textfield.get()) >= 8 ):
-          
             if check_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
                 
                 server_thread1 = threading.Thread(target=self.c_server.create_server())
@@ -210,7 +204,7 @@ class Gui():
                         
         
        
-        
+    #creates main window 
     def create_main_frame(self):
         
         self.main_frame = Frame(self.main_window,bg="WHITE")
