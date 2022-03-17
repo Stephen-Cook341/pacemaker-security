@@ -58,12 +58,11 @@ class Pacemaker_model():
          pass
      
      
-    #connects to server 
+    #connects to server if server port is unaible will attempt alternative port 
     def connect_to_server(self):
        
         try:
             self.sock.connect((self._ip,self._port))
-
 
         except socket.error as error:
             print("Using alt port")
@@ -78,8 +77,10 @@ class Pacemaker_model():
 
     #listener for data from server         
     def client_listener(self):
+        #sends pacemaker ID
         print("client listnener running")
         self.send_id()
+        
         while True: 
             data = self.sock.recv(self._buff_size)
             print("data is ",data)
@@ -91,9 +92,7 @@ class Pacemaker_model():
                 print("decrypted data",data)
                 
            
-            data = js.loads(str(data,encoding="utf-8"))
-            
-            
+            data = js.loads(str(data,encoding="utf-8")) 
             data = data['data']
                 
             for x in data:

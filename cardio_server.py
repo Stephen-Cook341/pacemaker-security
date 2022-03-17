@@ -9,7 +9,6 @@ import socket
 import threading
 import json as js
 import chardet
-
 #debug boolean disabled by default 
 debug = False
 

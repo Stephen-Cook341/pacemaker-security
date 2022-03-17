@@ -43,6 +43,7 @@ class Main():
         patient_ecg = self.patient_3.getECG()
         ecg_signal = self.ecg_signal_pacedDDD
         mode = "DDD Pacing Mode "
+        self.get_ddd_mode(mode)
         self.draw_graph(mode,patient_ecg,ecg_signal)
         
         #self.vvi_mode()
@@ -145,8 +146,8 @@ class Main():
         self.x1 = plt.subplot(2, 1, 1)
         self.ax2 = plt.subplot(2, 1, 2)
         self.y1 = np.array(self.patient_3.getECG())
-        y2 = np.array(self.ecg_signal_pacedDDD)
-        ani = FuncAnimation(fig, self.animate, frames=np.arange(0, len(self.x1), self.data_skip), init_func=self.init_func(), interval=50,
+        self.y2 = np.array(self.ecg_signal_pacedDDD)
+        self.ani = FuncAnimation(fig, self.animate, frames=np.arange(0, len(self.x1), self.data_skip), init_func=self.init_func(), interval=50,
                             repeat=True)
         plt.show()
     
@@ -170,7 +171,8 @@ class Main():
         plt.show()
         self.data_skip = 100
 
-
+        
+    
         fig = plt.figure()
         fig.suptitle(mode)
         self.x1 = plt.subplot(2, 1, 1)
@@ -181,8 +183,24 @@ class Main():
                             repeat=True)
         plt.show()
     
-  
-            
+    #getters for all three modes 
+    def get_ddd_mode(self):
+        
+        mode="DDD"
+        print(mode,self.patient_3.ecg_signal, self.ecg_signal_pacedDDD)
+        return mode,self.patient_3.ecg_signal, self.ecg_signal_pacedDDD
+          
+    def get_vvi_mode(self):
+        
+        mode ="VVI"
+        print(mode,self.patient_2.ecg_signal,self.ecg_signal_pacedVVI)
+        return mode,self.patient_2.ecg_signal,self.ecg_signal_pacedVVI
+    def get_aai_mode(self):
+        
+        mode = "AAI"
+        print(mode,self.patient_1.ecg_signal,self.ecg_signal_pacedAAI)
+        return mode,self.patient_1.ecg_signal,self.ecg_signal_pacedAAI
+        
 main = Main()
 
 '''ecg_df = pd.DataFrame({"patient's heart rate": patient_2.getECG()})

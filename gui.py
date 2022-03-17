@@ -15,11 +15,13 @@ from cryptography_tools import *
 from tkmacosx import Button
 matplotlib.use('TkAgg')
 
+#TODO add waiting for pacemaker screen to GUI
 
 class Gui():
     
     
     def __init__(self,main_window):
+        
         #encryption is on by default 
         self.encryption_on = True
         #runs the cardio server on a seperate thread 
@@ -38,6 +40,7 @@ class Gui():
 
         
     def login_menu(self):
+        
         #sets title of login menu 
         title = Label(self.main_frame, text="Please enter login details",font=("Arial", 15,'bold'),bg='white')  
         title.grid(row=1,column=0,padx=18,pady= 15),
@@ -157,6 +160,7 @@ class Gui():
         
     #encyrpt toggle btn function     
     def encrypt_button_switch(self):
+        
         #if encryption is false sets encryption to true and chnages encrypt button value sends encrypt command to client 
         if(self.encryption_on == False):
 
@@ -177,7 +181,7 @@ class Gui():
         
     #clears the primary frame    
     def clear_frame(self):
-        
+        #clears the main frame 
         frame_info = self.main_frame.winfo_children()
         for widget in frame_info:
             widget.destroy()
@@ -185,7 +189,10 @@ class Gui():
     def set_mode(self):
         print(self.mode_combo.get())
 
+
+    #checks the username and password agaisnt one that is stored. 
     def verify_credentials(self):
+        
         #if string lenght is greater or equal to 8 will check username 
         if(len(self._password_textfield.get()) >= 8 ):
             if check_user(whitelist_input(self._uname_textfield.get()),whitelist_input(self._password_textfield.get())):
