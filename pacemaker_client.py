@@ -9,6 +9,7 @@ from matplotlib import animation
 from matplotlib.animation import FuncAnimation
 from time import sleep
 from cryptography_tools import Cryptography_tools
+from pacemaker_core import Pacemaker_core
 
 class Pacemaker_client():
     
@@ -37,6 +38,7 @@ class Pacemaker_client():
         
         self.crypto_tools = Cryptography_tools()
         self.encrypt = True
+        self.pacemaker_core = Pacemaker_core()
         self.connect_to_server()
 
     # simulates the battery being used   
@@ -111,7 +113,8 @@ class Pacemaker_client():
                         self.set_encryption(str(x["value"]))
                         
                     if(x["command_name"]=="set_mode"):
-                        self.set_mode(str(x))
+                        self.set_mode(str(x['value']))
+                        print(str(x['value']))
                         
                     if(x["command_name"]=="bpm"):
                         self.set_bpm(str(x))
@@ -163,41 +166,38 @@ class Pacemaker_client():
 
         return mode,bat_percent,pace,encrypt
     
-    #sets mode 
+    #sets pacemaker mode 
     def set_mode(self,mode):
-            
-        mode = mode 
-        patient_ecg = ""
-        paced_ecg = ""
         
+        
+        self.mode = mode 
         #sets mode 
-        if(mode =="AAI"):
-            patient_ecg = self.patient_1.ecg_signal#check if correct 
-            paced_ecg = self.ecg_signal_pacedAAI
+        if(self.mode =="AAI"):
+            self.patient_ecg,self.paced_ecg = self.pacemaker_core.get_aai_mode()
             
+        if(self.mode =="VVI"):
+            self.patient_ecg,self.paced_ecg = self.pacemaker_core.get_vvi_mode()
+
             
-        if(mode =="VVI"):
-            patient_ecg = self.patient_2.ecg_signal#check if correct 
-            paced_ecg = self.ecg_signal_pacedVVI
-            
-        if(mode =="DDD"):
-            patient_ecg = self.patient_3.ecg_signal#check if correct 
-            paced_ecg = self.ecg_signal_pacedDDD  
-            
-            
-        self.draw_graph(mode,patient_ecg,paced_ecg)
+        if(self.mode =="DDD"):
+            self.patient_ecg,self.paced_ecg = self.pacemaker_core.get_ddd_mode()
+
+        graph_thread = threading.Thread(target=self.draw_graph)
+        graph_thread.daemon = True
+        graph_thread.start()
+          
     
     #draws the graph 
-    def draw_graph(self,mode,patient_ecg,ecg_signal):
+    def draw_graph(self):
             
         #pass modes 
-        self.y = np.array(patient_ecg)
+        self.y = np.array(self.patient_ecg)
         self.x = np.array(range(0, 30000))
-        self.y1 = np.array(ecg_signal)
+        self.y1 = np.array(self.paced_ecg)
         self.x1 = np.array(range(0, 30000))
         x1_size = self.x1.size
         self.fig, (self.ax1, self.ax2) = plt.subplots(2)
-        self.fig.suptitle(mode,"Mode")
+        self.fig.suptitle(self.mode)
         self.ax1.plot(self.x, self.y)
         self.ax1.plot(self.x, self.y, label="patient's heart rate")
         self.ax1.legend(loc="upper right")
@@ -209,17 +209,19 @@ class Pacemaker_client():
 
         
     
-        fig = plt.figure()
-        fig.suptitle(mode)
+        self.fig = plt.figure()
+        self.fig.suptitle(self.mode)
         
-        self.x1 = plt.subplot(2, 1, 1)
-        self.ax2 = plt.subplot(2, 1, 2)
-        self.y1 = np.array(patient_ecg)
-        self.y2 = np.array(ecg_signal)
-        self.ani = FuncAnimation(fig, self.animate, frames=np.arange(0, x1_size, self.data_skip), init_func=self.init_func(), interval=50,
-                            repeat=True)
+        #self.x1 = plt.subplot(2, 1, 1)
+        #self.ax2 = plt.subplot(2, 1, 2)
+        #self.y1 = np.array(self.patient_ecg)
+        #self.y2 = np.array(self.paced_ecg)
+        #self.ani = FuncAnimation(fig, self.animate, frames=np.arange(0, x1_size, self.data_skip), init_func=self.init_func(), interval=50,
+         #                   repeat=True)
         plt.show()
+        
+    def animate_graph():
+        pass
     
-
 pacemaker_client = Pacemaker_client()
 

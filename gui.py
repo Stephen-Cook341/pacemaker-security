@@ -188,7 +188,8 @@ class Gui():
             widget.destroy()
         
     def set_mode(self):
-        print(self.mode_combo.get())
+        #print(self.mode_combo.get())
+        self.c_server.set_mode(self.mode_combo.get())
 
 
     #checks the username and password agaisnt one that is stored. 
@@ -201,8 +202,12 @@ class Gui():
                 server_thread1 = threading.Thread(target=self.c_server.create_server())
                 server_thread1.daemon = True
                 server_thread1.start()
+                
                 #self.waiting_for_conn_screen()
-                self.menu()
+                if (self.c_server.client_connected == False):
+                    self.waiting_for_conn_screen()
+                else:
+                    self.menu()
             else:
                 label = Label(self.main_frame,text="Incorrect credentials",bg="white")
                 label.grid(row=6,column=0,pady=50)
@@ -218,9 +223,12 @@ class Gui():
         progress_bar = ttk.Progressbar(self.main_frame,mode="indeterminate",length=200,value=+50)
         progress_bar.grid()
         progress_bar.start()
+        while self.c_server.client_connected == False:
+            pass # TODO fix lopading bar
+        else:
+            self.menu()
         
         
-        pass 
     #creates main window 
     def create_main_frame(self):
         

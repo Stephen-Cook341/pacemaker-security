@@ -40,11 +40,12 @@ class Pacemaker_core():
         self.x = np.array(range(0, 30000))
         # ecg_df = pd.DataFrame({"paced heart rate": pacemaker_1.pace()})
         # nk.signal_plot(ecg_df)
-        patient_ecg = self.patient_3.getECG()
-        ecg_signal = self.ecg_signal_pacedDDD
-        mode = "DDD Pacing Mode "
+       
+        #patient_3_ecg = self.patient_3.getECG()
+        #patient_3_ecg_signal = self.ecg_signal_pacedDDD
+        #mode = "DDD Pacing Mode "
         #self.get_ddd_mode(mode)
-        self.set_mode("DDD")
+        #self.set_mode("DDD")
         #self.draw_graph(mode,patient_ecg,ecg_signal)
         
         #self.vvi_mode()
@@ -170,12 +171,32 @@ class Pacemaker_core():
             paced_ecg = self.ecg_signal_pacedVVI
             
         if(mode =="DDD"):
+            
             patient_ecg = self.patient_3.ecg_signal#check if correct 
             paced_ecg = self.ecg_signal_pacedDDD  
             
             
-        self.draw_graph(mode,patient_ecg,paced_ecg)
+            
+        #getters for all three modes 
+    def get_ddd_mode(self):
+       
+        patient_3_ecg = self.patient_3.getECG()
+        patient_3_ecg_signal = self.ecg_signal_pacedDDD
         
+        return patient_3_ecg,patient_3_ecg_signal
+            
+    def get_vvi_mode(self):
+            
+        print(self.patient_2.getECG(),self.ecg_signal_pacedVVI)
+        return self.patient_2.getECG(),self.ecg_signal_pacedVVI
+        
+    def get_aai_mode(self):
+            
+        print(self.patient_1.getECG(),self.ecg_signal_pacedAAI)
+        return self.patient_1.getECG(),self.ecg_signal_pacedAAI
+                
+            #self.draw_graph(mode,patient_ecg,paced_ecg)
+            
     
     #----------------------------------------------------------------------------------------------#
     #draws he graph but needs to be passed  mode,
@@ -211,23 +232,6 @@ class Pacemaker_core():
                             repeat=True)
         plt.show()
     
-    #getters for all three modes 
-    def get_ddd_mode(self):
+   
         
-        mode="DDD"
-        print(mode,self.patient_3.ecg_signal, self.ecg_signal_pacedDDD)
-        return mode,self.patient_3.ecg_signal, self.ecg_signal_pacedDDD
-          
-    def get_vvi_mode(self):
-        
-        mode ="VVI"
-        print(mode,self.patient_2.ecg_signal,self.ecg_signal_pacedVVI)
-        return mode,self.patient_2.ecg_signal,self.ecg_signal_pacedVVI
-    def get_aai_mode(self):
-        
-        mode = "AAI"
-        print(mode,self.patient_1.ecg_signal,self.ecg_signal_pacedAAI)
-        return mode,self.patient_1.ecg_signal,self.ecg_signal_pacedAAI
-        
-pacemaker_core = Pacemaker_core
 

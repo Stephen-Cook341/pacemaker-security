@@ -23,6 +23,9 @@ class Cardio_server():
         self._tcp_sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.crypto_tools = Cryptography_tools() 
         self.connections = []  
+        self.encryption = True
+        self.client_connected = False
+
         
         #if debug enabled run basic interface 
         if(debug == True):
@@ -76,11 +79,12 @@ class Cardio_server():
         
     #handles client connections
     def client_handler(self,c,a):
+        
         #listens for data from client if no data client disconnected
         while True:
+            
             data = c.recv(self._buff_size)
-          
-            if not data:
+            if (not data):
                 print('Pacemaker: ',c," is disconnected")
                 break
 
@@ -93,7 +97,6 @@ class Cardio_server():
             #if header is id print id and save to list 
                 if (x['header'] == 'pacemaker_identity'):
                     print("pacemaker id is ",x['pacemaker_id'])
-                    #TODO add save to list 
                 
                 #this is the gui will recieve the update from the client
                 if(x['header'] == "update"):
@@ -101,10 +104,11 @@ class Cardio_server():
                         battery = x["battery"]
                         pace = x["pace"]
                         encrypt_status = x["encryption"]
-
                         self.update_gui(mode,battery,pace,encrypt_status)
 
             print(data)
+            
+            
     #returns vars for gui to update
     def update_gui(self,mode,battery,pace,encrypt_status):
         return mode,battery,pace,encrypt_status
@@ -117,20 +121,26 @@ class Cardio_server():
         
             
     def client_listener(self):
-        
+
         while True:
-            
+    
             c,a = self._tcp_sock.accept()
             print("client",c," connected")
+            self.client_connected = True
             self.connections.append(c)
 
             client_thread = threading.Thread(target=self.client_handler,args=(c,a))
             client_thread.daemon = True
             client_thread.start()
            
-            
+    #sends data to client        
     def send_msg(self,data):
-          for connection in self.connections:
+        data  = js.dumps(data)
+        #if encrypt is true encrypts data
+        if(self.encryption):
+            data = self.crypto_tools.encrypt(data)
+
+        for connection in self.connections:
             
             msg = str(data,encoding='utf-8')
             connection.send(bytes(msg,encoding='utf-8'))
@@ -141,33 +151,35 @@ class Cardio_server():
             
     def set_encrypt_on_off(self,encrypt):
 
-
         if encrypt == False:
-            
-        
+            self.encryption = False
             data = {"data":[
                     {"header":"command", "command_name": "set_encryption",
                         "value":False}
                     ]
                 }
             
+            self.send_msg(data) 
+            
         if encrypt == True:
+            self.encryption = True
             data = {"data":[
                     {"header":"command", "command_name": "set_encryption",
                         "value":True}
                     ]
-                }
-
-
-
-
-        data  = js.dumps(data)
-        data = self.crypto_tools.encrypt(data)
-
-        self.send_msg(data) 
+                }        
+    
+            self.send_msg(data) 
 
         
+    def set_mode(self,mode):
+        data = {"data":[
+                    {"header":"command", "command_name": "set_mode",
+                        "value":mode}
+                    ]
+                }
+        
+        self.send_msg(data) 
 
-       
             
             
