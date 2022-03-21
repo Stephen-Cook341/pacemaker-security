@@ -1,12 +1,16 @@
-from crypt import crypt
 import socket
 import json as js
-from time import sleep
-from cryptography_tools import Cryptography_tools
 import threading
 import sys
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from matplotlib.animation import FuncAnimation
+from time import sleep
+from cryptography_tools import Cryptography_tools
 
-class Pacemaker_model():
+class Pacemaker_client():
     
     def __init__(self):
         
@@ -99,12 +103,16 @@ class Pacemaker_model():
                 
             #if header is command get command and value before passing it 
                 if str(x['header']) == 'command':
+                    
                     print(x['command_name'],x["value"])
-
+                    
+                    #passes encryption value to set encryption 
                     if(x["command_name"]=="set_encryption"):
                         self.set_encryption(str(x["value"]))
+                        
                     if(x["command_name"]=="set_mode"):
                         self.set_mode(str(x))
+                        
                     if(x["command_name"]=="bpm"):
                         self.set_bpm(str(x))
 
@@ -155,5 +163,63 @@ class Pacemaker_model():
 
         return mode,bat_percent,pace,encrypt
     
+    #sets mode 
+    def set_mode(self,mode):
+            
+        mode = mode 
+        patient_ecg = ""
+        paced_ecg = ""
+        
+        #sets mode 
+        if(mode =="AAI"):
+            patient_ecg = self.patient_1.ecg_signal#check if correct 
+            paced_ecg = self.ecg_signal_pacedAAI
+            
+            
+        if(mode =="VVI"):
+            patient_ecg = self.patient_2.ecg_signal#check if correct 
+            paced_ecg = self.ecg_signal_pacedVVI
+            
+        if(mode =="DDD"):
+            patient_ecg = self.patient_3.ecg_signal#check if correct 
+            paced_ecg = self.ecg_signal_pacedDDD  
+            
+            
+        self.draw_graph(mode,patient_ecg,paced_ecg)
+    
+    #draws the graph 
+    def draw_graph(self,mode,patient_ecg,ecg_signal):
+            
+        #pass modes 
+        self.y = np.array(patient_ecg)
+        self.x = np.array(range(0, 30000))
+        self.y1 = np.array(ecg_signal)
+        self.x1 = np.array(range(0, 30000))
+        x1_size = self.x1.size
+        self.fig, (self.ax1, self.ax2) = plt.subplots(2)
+        self.fig.suptitle(mode,"Mode")
+        self.ax1.plot(self.x, self.y)
+        self.ax1.plot(self.x, self.y, label="patient's heart rate")
+        self.ax1.legend(loc="upper right")
+        self.ax2.plot(self.x1, self.y1)
+        self.ax2.plot(self.x1, self.y1, label="paced heart rate")
+        self.ax2.legend(loc="upper right")
+        plt.show()
+        self.data_skip = 100
 
-dummy_pacemaker = Pacemaker_model()
+        
+    
+        fig = plt.figure()
+        fig.suptitle(mode)
+        
+        self.x1 = plt.subplot(2, 1, 1)
+        self.ax2 = plt.subplot(2, 1, 2)
+        self.y1 = np.array(patient_ecg)
+        self.y2 = np.array(ecg_signal)
+        self.ani = FuncAnimation(fig, self.animate, frames=np.arange(0, x1_size, self.data_skip), init_func=self.init_func(), interval=50,
+                            repeat=True)
+        plt.show()
+    
+
+pacemaker_client = Pacemaker_client()
+

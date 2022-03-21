@@ -1,4 +1,5 @@
 import  threading
+from tracemalloc import start
 from turtle import bgcolor, width
 import matplotlib
 import matplotlib.pyplot as plt
@@ -200,6 +201,7 @@ class Gui():
                 server_thread1 = threading.Thread(target=self.c_server.create_server())
                 server_thread1.daemon = True
                 server_thread1.start()
+                #self.waiting_for_conn_screen()
                 self.menu()
             else:
                 label = Label(self.main_frame,text="Incorrect credentials",bg="white")
@@ -209,8 +211,16 @@ class Gui():
             label = Label(self.main_frame,text="password length must be greater than 8",bg="white")
             label.grid(row=6,column=0,pady=50)
                         
+    def waiting_for_conn_screen(self):
+        self.clear_frame()
+        title = Label(self.main_frame,text="Waiting for Pacemaker to connect")
+        title.grid()
+        progress_bar = ttk.Progressbar(self.main_frame,mode="indeterminate",length=200,value=+50)
+        progress_bar.grid()
+        progress_bar.start()
         
-       
+        
+        pass 
     #creates main window 
     def create_main_frame(self):
         
