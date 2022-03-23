@@ -1,11 +1,14 @@
 # pacemaker-security
+_______
 Required Modules
+______
 
 os, json, cryptography, bcrypt, base64, tkinter, socket, sys, errno, threading, datetime, re, secrets, typing, random, neurokit2, matplotlib, tkmacosx, numpy
 
 All modules can be installed using the pip3 install “module-name”
-
+______
 How to run the program
+_____
 
 The pacemaker client resides in the client directory and the server in the server directory.
 
