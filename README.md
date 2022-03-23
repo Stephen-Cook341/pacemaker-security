@@ -20,6 +20,5 @@ Now in the client directory run the pacemaker_client.py file with python3. The G
 
 Editable settings include. Each setting can only be changed one at time. Do not change multiple settings at once. This will cause unexpected behavior which may crash the program.
 
-Pacemaker Modes: DDD,AAI,VVI. Encryption: ON/OFF. battery_capacity : 30 (by default).
+Pacemaker Modes: DDD,AAI,VVI. Encryption: ON/OFF.
 
-To shutdown the pacemaker model simply click on the quit button. This shutdown both the client and server.
